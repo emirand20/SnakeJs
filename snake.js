@@ -11,7 +11,10 @@ class Game {
 	 * @param {number} height -  height del canvas
 	 * @param {number} amount -  nombre de quadrats per fila de la quadrícula
 	 */
-	constructor(width,height,amount) {
+	constructor(width, height, amount) {
+		this.width = width
+		this.height = height
+		this.amount = amount
 	}
 
 	/**
@@ -36,7 +39,7 @@ class Game {
 	 * @param {number} y -  posició y de la quadrícula (no del canvas)
 	 * @param {string} color -  color del quadrat
 	 */
-	drawSquare(x,y,color) {
+	drawSquare(x, y, color) {
 	}
 
 	/**
@@ -63,7 +66,7 @@ class Game {
 	 * @param {number} y -  posició y a comprovar
 	 * @return {boolean} - xoca o no
 	 */
-	collides(x,y) {
+	collides(x, y) {
 	}
 
 	/**
@@ -94,6 +97,6 @@ class Game {
 	}
 }
 
-let game = new Game(300,300,15); // Crea un nou joc
+let game = new Game(300, 300, 15); // Crea un nou joc
 document.onkeydown = game.input.bind(game); // Assigna l'event de les tecles a la funció input del nostre joc
-window.setInterval(game.step.bind(game),100); // Fes que la funció que actualitza el nostre joc s'executi cada 100ms
+window.setInterval(game.step.bind(game), 100); // Fes que la funció que actualitza el nostre joc s'executi cada 100ms
