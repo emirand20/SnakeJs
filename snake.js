@@ -12,9 +12,16 @@ class Game {
 	 * @param {number} amount -  nombre de quadrats per fila de la quadrícula
 	 */
 	constructor(width, height, amount) {
-		this.width = width
-		this.height = height
-		this.amount = amount
+		this.width = width;
+		this.height = height;
+		this.amount = amount;
+		this.canvas = null;
+		this.ctx = null;
+		this.snake = [];
+		this.food = [];
+		this.direction = "right";
+		this.score = 0;
+		this.interval = null;
 	}
 
 	/**
@@ -24,6 +31,11 @@ class Game {
 	 * @param {number} height -  height del canvas
 	 */
 	initCanvas(width, height) {
+		this.canvas = document.createElement("canvas");
+		this.canvas.width = width;
+		this.canvas.height = height;
+		this.ctx = this.canvas.getContext("2d");
+		document.body.appendChild(this.canvas);
 	}
 
 	/**
@@ -31,6 +43,12 @@ class Game {
 	 * Serp al centre, direcció cap a la dreta, puntuació 0
 	 */
 	start() {
+		let center = this.amount / 2;
+		this.snake = [[center, center]];
+		this.food = [];
+		this.direction = "right";
+		this.score = 0;
+		this.addFood();
 	}
 
 	/**
@@ -40,24 +58,33 @@ class Game {
 	 * @param {string} color -  color del quadrat
 	 */
 	drawSquare(x, y, color) {
+		this.ctx.fillStyle = color;
+		this.ctx.fillRect(x * this.amount, y * this.amount, this.amount, this.amount);
 	}
 
 	/**
 	 * Neteja el canvas (pinta'l de blanc)
 	 */
 	clear() {
+		this.ctx.clearRect(0, 0, this.width, this.height);
 	}
 
 	/**
 	 * Dibuixa la serp al canvas
 	 */
 	drawSnake() {
+		this.snake.forEach(tile => {
+			this.drawSquare(tile[0], tile[1], "blue");
+		});
 	}
 
 	/**
 	 * Dibuixa la poma al canvas
 	 */
 	drawFood() {
+		for (let i = 0; i < this.food.length; i++) {
+			this.drawSquare(this.food[i][0], this.food[i][1], "red");
+		}
 	}
 
 	/**
@@ -67,12 +94,25 @@ class Game {
 	 * @return {boolean} - xoca o no
 	 */
 	collides(x, y) {
+		for (let i = 0; i < this.snake.length; i++) {
+			if (x === this.snake[i][0] && y === this.snake[i][1]) {
+				return true;
+			}
+		}
+		return false;
 	}
 
 	/**
 	 * Afegeix un menjar a una posició aleatòria, la posició no ha de ser cap de les de la serp
 	 */
 	addFood() {
+		let x = Math.floor(Math.random() * this.amount);
+		let y = Math.floor(Math.random() * this.amount);
+		while (this.collides(x, y)) {
+			x = Math.floor(Math.random() * this.amount);
+			y = Math.floor(Math.random() * this.amount);
+		}
+		this.food.push([x, y]);
 	}
 
 	/**
