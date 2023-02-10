@@ -3,7 +3,7 @@
  * @class
  */
 class Game {
-
+	//necesito crear el juego del snake con js y canvas, utilizando una clase llamada Game, con un contructor(width, height, amount), con metrodos: initCanvas(), start(), drawSquare(x, y, color), clear(), drawSnake(), drawFood(), collides(x, y), addFood(), newTile(), step(), input(). Con estas condiciones, se ha de poder jugar al snake, añadiendo que cada vez que coma la serpiente, aumente la velocidad
 	/**
 	 * Inicialitza els paràmetres del joc i crea el canvas
 	 * @constructor
@@ -15,13 +15,10 @@ class Game {
 		this.width = width;
 		this.height = height;
 		this.amount = amount;
-		this.canvas = null;
-		this.ctx = null;
 		this.snake = [];
 		this.food = [];
 		this.direction = "right";
-		this.score = 0;
-		this.interval = null;
+		this.speed = 200;
 	}
 
 	/**
@@ -30,10 +27,10 @@ class Game {
 	 * @param {number} width -  width del canvas
 	 * @param {number} height -  height del canvas
 	 */
-	initCanvas(width, height) {
+	initCanvas() {
 		this.canvas = document.createElement("canvas");
-		this.canvas.width = width;
-		this.canvas.height = height;
+		this.canvas.width = 500
+		this.canvas.height = 500
 		this.ctx = this.canvas.getContext("2d");
 		document.body.appendChild(this.canvas);
 	}
@@ -43,12 +40,12 @@ class Game {
 	 * Serp al centre, direcció cap a la dreta, puntuació 0
 	 */
 	start() {
-		let center = this.amount / 2;
-		this.snake = [[center, center]];
-		this.food = [];
-		this.direction = "right";
-		this.score = 0;
+		this.initCanvas();
+		this.newTile();
 		this.addFood();
+		this.interval = setInterval(() => {
+			this.step();
+		}, this.speed);
 	}
 
 	/**
@@ -74,7 +71,7 @@ class Game {
 	 */
 	drawSnake() {
 		this.snake.forEach(tile => {
-			this.drawSquare(tile[0], tile[1], "blue");
+			this.drawSquare(tile.x, tile.y, "blue");
 		});
 	}
 
@@ -82,9 +79,9 @@ class Game {
 	 * Dibuixa la poma al canvas
 	 */
 	drawFood() {
-		for (let i = 0; i < this.food.length; i++) {
-			this.drawSquare(this.food[i][0], this.food[i][1], "red");
-		}
+		this.food.forEach(tile => {
+			this.drawSquare(tile.x, tile.y, "red");
+		});
 	}
 
 	/**
@@ -94,25 +91,22 @@ class Game {
 	 * @return {boolean} - xoca o no
 	 */
 	collides(x, y) {
-		for (let i = 0; i < this.snake.length; i++) {
-			if (x === this.snake[i][0] && y === this.snake[i][1]) {
-				return true;
-			}
-		}
-		return false;
+		return this.snake.some(tile => {
+			return tile.x === x && tile.y === y;
+		});
 	}
 
 	/**
 	 * Afegeix un menjar a una posició aleatòria, la posició no ha de ser cap de les de la serp
 	 */
 	addFood() {
-		let x = Math.floor(Math.random() * this.amount);
-		let y = Math.floor(Math.random() * this.amount);
+		let x = Math.floor(Math.random() * (this.width / this.amount));
+		let y = Math.floor(Math.random() * (this.height / this.amount));
 		while (this.collides(x, y)) {
-			x = Math.floor(Math.random() * this.amount);
-			y = Math.floor(Math.random() * this.amount);
+			x = Math.floor(Math.random() * (this.width / this.amount));
+			y = Math.floor(Math.random() * (this.height / this.amount));
 		}
-		this.food.push([x, y]);
+		this.food.push({ x, y });
 	}
 
 	/**
@@ -120,6 +114,27 @@ class Game {
 	 * @return {Array} - nova posició
 	 */
 	newTile() {
+		// let x = Math.floor(this.width / this.amount / 2);
+		// let y = Math.floor(this.height / this.amount / 2);
+		// this.snake.unshift({ x, y });
+		const head = this.snake[0];
+		let x = head;
+		let y = head;
+		switch (this.direction) {
+			case "right":
+				x++;
+				break;
+			case "left":
+				x--;
+				break;
+			case "up":
+				y--;
+				break;
+			case "down":
+				y++;
+				break;
+		}
+		this.snake.unshift({x, y});
 	}
 
 	/**
@@ -127,6 +142,53 @@ class Game {
 	 * i ho dibuixa al canvas
 	 */
 	step() {
+		// Mueve la serpiente en la dirección actual
+		const head = { x: this.snake[0].x, y: this.snake[0].y };
+		switch (this.direction) {
+			case "right":
+				head.x++;
+				break;
+			case "left":
+				head.x--;
+				break;
+			case "up":
+				head.y--;
+				break;
+			case "down":
+				head.y++;
+				break;
+		}
+	
+		// Comprueba si la serpiente ha chocado contra los bordes o su cuerpo
+		if (head.x < 0 || head.x >= this.width / this.amount || head.y < 0 || head.y >= this.height / this.amount || this.collides(head.x, head.y)) {
+			clearInterval(this.interval);
+			alert("Game Over");
+			return;
+		}
+	
+		// Comprueba si la serpiente ha comido alguna poma
+		if (this.food.some(tile => tile.x === head.x && tile.y === head.y)) {
+			// Aumenta la velocidad del juego
+			this.speed -= 20;
+			clearInterval(this.interval);
+			this.interval = setInterval(() => {
+				this.step();
+			}, this.speed);
+			// Elimina la poma comida y agrega una nueva
+			this.food = this.food.filter(tile => tile.x !== head.x || tile.y !== head.y);
+			this.addFood();
+		} else {
+			// Elimina la cola de la serpiente si no ha comido
+			this.snake.pop();
+		}
+	
+		// Agrega la nueva cabeza de la serpiente
+		this.snake.unshift(head);
+	
+		// Dibuja todos los elementos en el canvas
+		this.clear();
+		this.drawSnake();
+		this.drawFood();
 	}
 
 	/**
@@ -134,9 +196,30 @@ class Game {
 	 * @param {event} e - l'event de la tecla premuda
 	 */
 	input(e) {
+		switch (e.keyCode) {
+			case 37:
+				if (this.direction !== "right") this.direction = "left";
+				break;
+			case 38:
+				if (this.direction !== "down") this.direction = "up";
+				break;
+			case 39:
+				if (this.direction !== "left") this.direction = "right";
+				break;
+			case 40:
+				if (this.direction !== "up") this.direction = "down";
+				break;
+		}
 	}
-}
 
-let game = new Game(300, 300, 15); // Crea un nou joc
-document.onkeydown = game.input.bind(game); // Assigna l'event de les tecles a la funció input del nostre joc
-window.setInterval(game.step.bind(game), 100); // Fes que la funció que actualitza el nostre joc s'executi cada 100ms
+}
+let canvas = document.getElementById("game");
+let ctx = canvas.getContext("2d");
+let game = new Game(400, 400, 20);
+game.start();
+document.addEventListener("keydown", e => {
+	game.input(e);
+});
+// let game = new Game(300, 300, 15); // Crea un nou joc
+// document.onkeydown = game.input.bind(game); // Assigna l'event de les tecles a la funció input del nostre joc
+// window.setInterval(game.step.bind(game), 100); // Fes que la funció que actualitza el nostre joc s'executi cada 100ms
