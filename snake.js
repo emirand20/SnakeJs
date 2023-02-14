@@ -19,6 +19,8 @@ class Game {
 		this.food = [];
 		this.direction = "right";
 		this.speed = 200;
+		this.start()
+		this.initCanvas(width, height)
 	}
 
 	/**
@@ -27,11 +29,12 @@ class Game {
 	 * @param {number} width -  width del canvas
 	 * @param {number} height -  height del canvas
 	 */
-	initCanvas() {
-		this.canvas = document.createElement("canvas");
-		this.canvas.width = 500
-		this.canvas.height = 500
-		this.ctx = this.canvas.getContext("2d");
+	initCanvas(width, height) {
+		let canvas = document.createElement("canvas");
+		canvas.width = width
+		canvas.height = height
+		document.body.appendChild(canvas)
+		this.ctx = canvas.getContext("2d");
 		document.body.appendChild(this.canvas);
 	}
 
@@ -40,12 +43,14 @@ class Game {
 	 * Serp al centre, direcció cap a la dreta, puntuació 0
 	 */
 	start() {
-		this.initCanvas();
+		this.snake = [[parseInt(this.amount / 2), parseInt(this.amount / 2)]]
+		this.direction = [1, 0]
+		/*this.initCanvas();
 		this.newTile();
 		this.addFood();
 		this.interval = setInterval(() => {
 			this.step();
-		}, this.speed);
+		}, this.speed);*/
 	}
 
 	/**
@@ -55,14 +60,16 @@ class Game {
 	 * @param {string} color -  color del quadrat
 	 */
 	drawSquare(x, y, color) {
+		let mida = this.width / this.amount
 		this.ctx.fillStyle = color;
-		this.ctx.fillRect(x * this.amount, y * this.amount, this.amount, this.amount);
+		this.ctx.fillRect(x * mida, y * mida, mida, mida);
 	}
 
 	/**
 	 * Neteja el canvas (pinta'l de blanc)
 	 */
 	clear() {
+		this.ctx.fillStyle = 'white'
 		this.ctx.clearRect(0, 0, this.width, this.height);
 	}
 
@@ -70,9 +77,13 @@ class Game {
 	 * Dibuixa la serp al canvas
 	 */
 	drawSnake() {
-		this.snake.forEach(tile => {
+
+		for (let i = 0; i < this.snake.length; i++) {
+			this.drawSnake(this.snake[i][0], this.snake[i][1], "green")
+		}
+		/*this.snake.forEach(tile => {
 			this.drawSquare(tile.x, tile.y, "blue");
-		});
+		});*/
 	}
 
 	/**
@@ -114,10 +125,16 @@ class Game {
 	 * @return {Array} - nova posició
 	 */
 	newTile() {
+		let resultat = [0, 0]
+		resultat[0] = this.snake[0][0] + this.direction[0]
+		resultat[1] = this.snake[0][1] + this.direction[1]
+		resultat[0] = x % this.amount
+		resultat[1] = y % this.amount
+		//if(x<0)
 		// let x = Math.floor(this.width / this.amount / 2);
 		// let y = Math.floor(this.height / this.amount / 2);
 		// this.snake.unshift({ x, y });
-		const head = this.snake[0];
+		/*const head = this.snake[0];
 		let x = head;
 		let y = head;
 		switch (this.direction) {
@@ -134,7 +151,7 @@ class Game {
 				y++;
 				break;
 		}
-		this.snake.unshift({x, y});
+		this.snake.unshift({x, y});*/
 	}
 
 	/**
@@ -142,8 +159,11 @@ class Game {
 	 * i ho dibuixa al canvas
 	 */
 	step() {
+		this.clear()
+		this.snake[0] = this.newTile()
+		this.drawSnake() 
 		// Mueve la serpiente en la dirección actual
-		const head = { x: this.snake[0].x, y: this.snake[0].y };
+		/*const head = { x: this.snake[0].x, y: this.snake[0].y };
 		switch (this.direction) {
 			case "right":
 				head.x++;
@@ -188,7 +208,7 @@ class Game {
 		// Dibuja todos los elementos en el canvas
 		this.clear();
 		this.drawSnake();
-		this.drawFood();
+		this.drawFood();*/
 	}
 
 	/**
@@ -198,15 +218,19 @@ class Game {
 	input(e) {
 		switch (e.keyCode) {
 			case 37:
+				this.direction = [-1,0]
 				if (this.direction !== "right") this.direction = "left";
 				break;
 			case 38:
+				this.direction = [0,-1]
 				if (this.direction !== "down") this.direction = "up";
 				break;
 			case 39:
+				this.direction = [1,0]
 				if (this.direction !== "left") this.direction = "right";
 				break;
 			case 40:
+				this.direction = [0,1]
 				if (this.direction !== "up") this.direction = "down";
 				break;
 		}
