@@ -15,12 +15,13 @@ class Game {
 		this.width = width;
 		this.height = height;
 		this.amount = amount;
-		this.snake = [];
 		this.food = [];
+		this.start();
+		this.initCanvas(width, height);
+
+		/*this.snake = [];
 		this.direction = "right";
-		this.speed = 200;
-		this.start()
-		this.initCanvas(width, height)
+		this.speed = 200;*/
 	}
 
 	/**
@@ -30,12 +31,11 @@ class Game {
 	 * @param {number} height -  height del canvas
 	 */
 	initCanvas(width, height) {
-		let canvas = document.createElement("canvas");
+		let canvas = document.createElement("canvas")
 		canvas.width = width
 		canvas.height = height
 		document.body.appendChild(canvas)
-		this.ctx = canvas.getContext("2d");
-		document.body.appendChild(this.canvas);
+		this.ctx = canvas.getContext("2d")
 	}
 
 	/**
@@ -77,21 +77,17 @@ class Game {
 	 * Dibuixa la serp al canvas
 	 */
 	drawSnake() {
-
 		for (let i = 0; i < this.snake.length; i++) {
 			this.drawSnake(this.snake[i][0], this.snake[i][1], "green")
 		}
-		/*this.snake.forEach(tile => {
-			this.drawSquare(tile.x, tile.y, "blue");
-		});*/
 	}
 
 	/**
 	 * Dibuixa la poma al canvas
 	 */
 	drawFood() {
-		this.food.forEach(tile => {
-			this.drawSquare(tile.x, tile.y, "red");
+		this.food.forEach(poma => {
+			this.drawSquare('poma'.x, poma.y, "red");
 		});
 	}
 
@@ -101,23 +97,19 @@ class Game {
 	 * @param {number} y -  posició y a comprovar
 	 * @return {boolean} - xoca o no
 	 */
-	collides(x, y) {
-		return this.snake.some(tile => {
-			return tile.x === x && tile.y === y;
-		});
+	checkCollision(x, y, array) {
+		for (var i = 0; i < array.length; i++) {
+			if (array[i].x == x && array[i].y == y)
+				return true;
+		}
+		return false;
 	}
 
 	/**
 	 * Afegeix un menjar a una posició aleatòria, la posició no ha de ser cap de les de la serp
 	 */
 	addFood() {
-		let x = Math.floor(Math.random() * (this.width / this.amount));
-		let y = Math.floor(Math.random() * (this.height / this.amount));
-		while (this.collides(x, y)) {
-			x = Math.floor(Math.random() * (this.width / this.amount));
-			y = Math.floor(Math.random() * (this.height / this.amount));
-		}
-		this.food.push({ x, y });
+		this.food = [Math.random() * this.amount, Math.random() * this.amount];
 	}
 
 	/**
@@ -125,33 +117,15 @@ class Game {
 	 * @return {Array} - nova posició
 	 */
 	newTile() {
-		let resultat = [0, 0]
-		resultat[0] = this.snake[0][0] + this.direction[0]
-		resultat[1] = this.snake[0][1] + this.direction[1]
-		resultat[0] = x % this.amount
-		resultat[1] = y % this.amount
-		//if(x<0)
-		// let x = Math.floor(this.width / this.amount / 2);
-		// let y = Math.floor(this.height / this.amount / 2);
-		// this.snake.unshift({ x, y });
-		/*const head = this.snake[0];
-		let x = head;
-		let y = head;
-		switch (this.direction) {
-			case "right":
-				x++;
-				break;
-			case "left":
-				x--;
-				break;
-			case "up":
-				y--;
-				break;
-			case "down":
-				y++;
-				break;
-		}
-		this.snake.unshift({x, y});*/
+		let resultat = [0, 0];
+
+		let x = (this.snake[0][0] + this.direction[0]);
+		let y = (this.snake[0][1] + this.direction[1]);
+		resultat[0] = x % this.amount;
+		resultat[1] = y % this.amount;
+		if (x < 0) resultat[0] = this.amount + x;
+		if (y < 0) resultat[1] = this.amount + y;
+		return resultat;
 	}
 
 	/**
@@ -161,7 +135,8 @@ class Game {
 	step() {
 		this.clear()
 		this.snake[0] = this.newTile()
-		this.drawSnake() 
+		this.drawSnake()
+
 		// Mueve la serpiente en la dirección actual
 		/*const head = { x: this.snake[0].x, y: this.snake[0].y };
 		switch (this.direction) {
@@ -178,30 +153,7 @@ class Game {
 				head.y++;
 				break;
 		}
-	
-		// Comprueba si la serpiente ha chocado contra los bordes o su cuerpo
-		if (head.x < 0 || head.x >= this.width / this.amount || head.y < 0 || head.y >= this.height / this.amount || this.collides(head.x, head.y)) {
-			clearInterval(this.interval);
-			alert("Game Over");
-			return;
-		}
-	
-		// Comprueba si la serpiente ha comido alguna poma
-		if (this.food.some(tile => tile.x === head.x && tile.y === head.y)) {
-			// Aumenta la velocidad del juego
-			this.speed -= 20;
-			clearInterval(this.interval);
-			this.interval = setInterval(() => {
-				this.step();
-			}, this.speed);
-			// Elimina la poma comida y agrega una nueva
-			this.food = this.food.filter(tile => tile.x !== head.x || tile.y !== head.y);
-			this.addFood();
-		} else {
-			// Elimina la cola de la serpiente si no ha comido
-			this.snake.pop();
-		}
-	
+		
 		// Agrega la nueva cabeza de la serpiente
 		this.snake.unshift(head);
 	
@@ -218,19 +170,19 @@ class Game {
 	input(e) {
 		switch (e.keyCode) {
 			case 37:
-				this.direction = [-1,0]
+				this.direction = [-1, 0]
 				if (this.direction !== "right") this.direction = "left";
 				break;
 			case 38:
-				this.direction = [0,-1]
+				this.direction = [0, -1]
 				if (this.direction !== "down") this.direction = "up";
 				break;
 			case 39:
-				this.direction = [1,0]
+				this.direction = [1, 0]
 				if (this.direction !== "left") this.direction = "right";
 				break;
 			case 40:
-				this.direction = [0,1]
+				this.direction = [0, 1]
 				if (this.direction !== "up") this.direction = "down";
 				break;
 		}
