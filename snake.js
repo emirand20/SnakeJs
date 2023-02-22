@@ -78,9 +78,9 @@ class Game {
 	 * Dibuixa la serp al canvas
 	 */
 	drawSnake() {
-		for (let i = 0; i < this.snake.length; i++) {
-			this.drawSnake(this.snake[i][0], this.snake[i][1], "green")
-		}
+		this.snake.forEach(item => {
+			this.drawSnake(item[0], item[1], "green");
+		  });
 	}
 
 	/**
@@ -98,13 +98,9 @@ class Game {
 	 * @param {number} y -  posició y a comprovar
 	 * @return {boolean} - xoca o no
 	 */
-	checkCollision(x, y, array) {
-		for (var i = 0; i < array.length; i++) {
-			if (array[i].x == x && array[i].y == y)
-				return true
-		}
-		return false
-	}
+	 checkCollision(x, y, array) {
+		return array.map(item => item.x === x && item.y === y).includes(true);
+	  }
 
 	/**
 	 * Afegeix un menjar a una posició aleatòria, la posició no ha de ser cap de les de la serp
